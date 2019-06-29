@@ -25,16 +25,16 @@ func dirTree(out io.Writer, path string, printFiles bool) error {
 	return readRecursivelyDir(out, path, printFiles, "")
 }
 
-func readRecursivelyDir(out io.Writer, path string, printFiles bool, level string) error {
+func readRecursivelyDir(out io.Writer, path string, printFiles bool, prefix string) (err error) {
 	f, err := os.Open(path)
 	if err != nil {
-		return err
+		return
 	}
-	defer f.Close()
 
 	files, err := f.Readdir(-1)
+	f.Close()
 	if err != nil {
-		return err
+		return
 	}
 
 	if printFiles != true {
@@ -47,18 +47,18 @@ func readRecursivelyDir(out io.Writer, path string, printFiles bool, level strin
 
 	for i, file := range files {
 		nameFmt := file.Name()
-		levelFmt := level + "│\t"
+		prefixNext := prefix + "│\t"
 		if len(files)-1 == i {
-			levelFmt = level + "\t"
-			nameFmt = fmt.Sprintf("%v└───%v", level, nameFmt)
+			prefixNext = prefix + "\t"
+			nameFmt = fmt.Sprintf("%v└───%v", prefix, nameFmt)
 		} else {
-			nameFmt = fmt.Sprintf("%v├───%v", level, nameFmt)
+			nameFmt = fmt.Sprintf("%v├───%v", prefix, nameFmt)
 		}
 		if file.IsDir() {
 			fmt.Println(nameFmt)
-			err := readRecursivelyDir(out, path+"/"+file.Name(), printFiles, levelFmt)
+			err = readRecursivelyDir(out, path+"/"+file.Name(), printFiles, prefixNext)
 			if err != nil {
-				return err
+				return
 			}
 		} else if printFiles {
 			size := "empty"
@@ -68,7 +68,7 @@ func readRecursivelyDir(out io.Writer, path string, printFiles bool, level strin
 			fmt.Printf("%v (%v)\n", nameFmt, size)
 		}
 	}
-	return err
+	return
 }
 
 func removeFiles(list []os.FileInfo) (res []os.FileInfo) {
