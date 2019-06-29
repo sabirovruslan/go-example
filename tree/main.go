@@ -1,8 +1,10 @@
 package main
 
 import (
+	"fmt"
 	"io"
 	"os"
+	"sort"
 )
 
 func main() {
@@ -16,8 +18,46 @@ func main() {
 	if err != nil {
 		panic(err.Error())
 	}
+
 }
 
 func dirTree(out io.Writer, path string, printFiles bool) error {
+	list, err := readDir(path)
+	if err != nil {
+		return err
+	}
+
+	for _, file := range list {
+		if file.IsDir() {
+			fmt.Println(file.Name())
+			err := dirTree(out, path+"/"+file.Name(), printFiles)
+			if err != nil {
+				return err
+			}
+
+		} else if printFiles {
+			fmt.Println(file.Name())
+		}
+	}
+
 	return nil
+}
+
+func readDir(path string) ([]os.FileInfo, error) {
+	f, err := os.Open(path)
+	if err != nil {
+		return nil, err
+	}
+	defer f.Close()
+
+	files, err := f.Readdir(-1)
+	if err != nil {
+		return nil, err
+	}
+
+	sort.Slice(files, func(i, j int) bool {
+		return files[i].Name() < files[j].Name()
+	})
+
+	return files, nil
 }
