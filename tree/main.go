@@ -7,6 +7,8 @@ import (
 	"sort"
 )
 
+const levelFmt = "│\t"
+
 func main() {
 	out := os.Stdout
 	if !(len(os.Args) == 2 || len(os.Args) == 3) {
@@ -27,16 +29,24 @@ func dirTree(out io.Writer, path string, printFiles bool) error {
 		return err
 	}
 
-	for _, file := range list {
+	for i, file := range list {
+		nameFmt := file.Name()
+		if i == 0 {
+			nameFmt = fmt.Sprintf("├───%v", nameFmt)
+		}
 		if file.IsDir() {
-			fmt.Println(file.Name())
+			fmt.Println(nameFmt)
 			err := dirTree(out, path+"/"+file.Name(), printFiles)
 			if err != nil {
 				return err
 			}
-
 		} else if printFiles {
-			fmt.Println(file.Name())
+			size := "empty"
+			if file.Size() > 0 {
+				size = fmt.Sprintf("%vb", file.Size())
+			}
+
+			fmt.Printf("%v (%v)\n", nameFmt, size)
 		}
 	}
 
