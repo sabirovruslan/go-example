@@ -53,7 +53,7 @@ func readRecursivelyDir(out io.Writer, path string, printFiles bool, prefix stri
 			nameFmt = fmt.Sprintf("%v└───%v", prefix, file.Name())
 		}
 		if file.IsDir() {
-			fmt.Println(nameFmt)
+			_, _ = fmt.Fprintln(out, nameFmt)
 			err = readRecursivelyDir(out, path+"/"+file.Name(), printFiles, prefixNext)
 			if err != nil {
 				return
@@ -63,7 +63,8 @@ func readRecursivelyDir(out io.Writer, path string, printFiles bool, prefix stri
 			if file.Size() > 0 {
 				size = fmt.Sprintf("%vb", file.Size())
 			}
-			fmt.Printf("%v (%v)\n", nameFmt, size)
+			nameFmt = fmt.Sprintf("%v (%v)", nameFmt, size)
+			_, _ = fmt.Fprintln(out, nameFmt)
 		}
 	}
 	return
