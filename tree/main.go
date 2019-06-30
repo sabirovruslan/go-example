@@ -46,13 +46,11 @@ func readRecursivelyDir(out io.Writer, path string, printFiles bool, prefix stri
 	})
 
 	for i, file := range files {
-		nameFmt := file.Name()
+		nameFmt := fmt.Sprintf("%v├───%v", prefix, file.Name())
 		prefixNext := prefix + "│\t"
 		if len(files)-1 == i {
 			prefixNext = prefix + "\t"
-			nameFmt = fmt.Sprintf("%v└───%v", prefix, nameFmt)
-		} else {
-			nameFmt = fmt.Sprintf("%v├───%v", prefix, nameFmt)
+			nameFmt = fmt.Sprintf("%v└───%v", prefix, file.Name())
 		}
 		if file.IsDir() {
 			fmt.Println(nameFmt)
